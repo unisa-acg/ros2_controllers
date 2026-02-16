@@ -57,11 +57,11 @@ protected:
   std::unique_ptr<PoseBroadcaster> pose_broadcaster_;
 
   template <typename T>
-  void subscribe_and_get_message(const std::string & topic, T & msg);
+  void subscribe_and_get_message(const std::string & topic, T & msg, const rclcpp::QoS & qos = rclcpp::QoS(10));
 };
 
 template <typename T>
-void PoseBroadcasterTest::subscribe_and_get_message(const std::string & topic, T & msg)
+void PoseBroadcasterTest::subscribe_and_get_message(const std::string & topic, T & msg, const rclcpp::QoS & qos)
 {
   // Create node for subscribing
   rclcpp::Node node{"test_subscription_node"};
@@ -71,7 +71,7 @@ void PoseBroadcasterTest::subscribe_and_get_message(const std::string & topic, T
   // Create subscription
   typename T::SharedPtr received_msg;
   const auto msg_callback = [&](const typename T::SharedPtr sub_msg) { received_msg = sub_msg; };
-  const auto subscription = node.create_subscription<T>(topic, 10, msg_callback);
+  const auto subscription = node.create_subscription<T>(topic, qos, msg_callback);
 
   // Update controller and spin until a message is received
   // Since update doesn't guarantee a published message, republish until received

@@ -57,6 +57,7 @@ public:
     const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
 private:
+
   std::shared_ptr<ParamListener> param_listener_;
   Params params_;
 
