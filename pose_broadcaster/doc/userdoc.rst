@@ -25,3 +25,18 @@ An example parameter file for this controller can be found in `the test director
 
 .. literalinclude:: ../test/pose_broadcaster_params.yaml
    :language: yaml
+
+QoS Configuration
+=========================
+
+The pose broadcaster supports two Quality of Service (QoS) profiles for the pose publisher:
+
+* **reliable** (default): Uses ``SystemDefaultsQoS`` - Guaranteed message delivery, keep_last 10, volatile
+* **best_effort**: Uses ``SensorDataQoS`` - Faster but may lose messages, keep_last 5, volatile
+
+Example with best_effort QoS:
+
+.. literalinclude:: ../test/pose_broadcaster_custom_qos_params.yaml
+   :language: yaml
+
+Choose **reliable** for critical pose data that must not be lost, or **best_effort** for high-frequency sensor data where missing occasional messages is acceptable.
