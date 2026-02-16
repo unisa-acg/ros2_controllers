@@ -97,12 +97,15 @@ protected:
   Params params_;
   std::unordered_map<std::string, std::string> map_interface_to_joint_state_;
 
+  std::string frame_id_;
+
   //  For the JointState message,
   //  we store the name of joints with compatible interfaces
   std::vector<std::string> joint_names_;
   std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::JointState>> joint_state_publisher_;
   std::shared_ptr<realtime_tools::RealtimePublisher<sensor_msgs::msg::JointState>>
     realtime_joint_state_publisher_;
+  sensor_msgs::msg::JointState joint_state_msg_;
 
   //  For the DynamicJointState format, we use a map to buffer values in for easier lookup
   //  This allows to preserve whatever order or names/interfaces were initialized.
@@ -111,6 +114,7 @@ protected:
     dynamic_joint_state_publisher_;
   std::shared_ptr<realtime_tools::RealtimePublisher<control_msgs::msg::DynamicJointState>>
     realtime_dynamic_joint_state_publisher_;
+  control_msgs::msg::DynamicJointState dynamic_joint_state_msg_;
 
   urdf::Model model_;
   bool is_model_loaded_ = false;
