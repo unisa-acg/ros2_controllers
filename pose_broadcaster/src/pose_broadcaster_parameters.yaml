@@ -13,6 +13,12 @@ pose_broadcaster:
     <pose_name>/orientation.x, ..., <pose_name>/orientation.w``"
     validation:
       not_empty<>: null
+  qos_profile:
+    type: string
+    default_value: "reliable"
+    description: "QoS reliability profile for pose publisher. 'reliable' uses SystemDefaultsQoS (guaranteed delivery, keep_last 10). 'best_effort' uses SensorDataQoS (faster but may lose messages, keep_last 5). Options: 'reliable', 'best_effort'"
+    validation:
+      one_of<>: [["reliable", "best_effort"]]
   tf:
     enable:
       type: bool

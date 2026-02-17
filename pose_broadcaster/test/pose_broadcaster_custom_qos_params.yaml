@@ -1,0 +1,7 @@
+test_pose_broadcaster_custom_qos:
+  ros__parameters:
+    pose_name: "test_pose"
+    frame_id: "pose_frame"
+    
+    # Use best_effort QoS profile (SensorDataQoS)
+    qos_profile: "best_effort"

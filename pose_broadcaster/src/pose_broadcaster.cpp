@@ -85,8 +85,13 @@ controller_interface::CallbackReturn PoseBroadcaster::on_configure(
 
   try
   {
+    // Select QoS profile based on parameter
+    auto qos_profile = params_.qos_profile == "best_effort" 
+      ? rclcpp::QoS(rclcpp::SensorDataQoS()) 
+      : rclcpp::QoS(rclcpp::SystemDefaultsQoS());
+    
     pose_publisher_ = get_node()->create_publisher<geometry_msgs::msg::PoseStamped>(
-      DEFAULT_POSE_TOPIC, rclcpp::SystemDefaultsQoS());
+      DEFAULT_POSE_TOPIC, qos_profile);
     realtime_publisher_ =
       std::make_unique<realtime_tools::RealtimePublisher<geometry_msgs::msg::PoseStamped>>(
         pose_publisher_);

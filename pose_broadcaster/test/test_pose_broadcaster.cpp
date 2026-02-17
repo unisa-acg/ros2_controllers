@@ -241,6 +241,89 @@ TEST_F(PoseBroadcasterTest, invalid_pose_no_tf_published)
   ASSERT_EQ(tf_msg.transforms.size(), 0lu);
 }
 
+TEST_F(PoseBroadcasterTest, Configure_WithDefaultQoS)
+{
+  SetUpPoseBroadcaster();
+
+  // Set 'pose_name' and 'frame_id' parameters without QoS params (use defaults)
+  pose_broadcaster_->get_node()->set_parameter({"pose_name", pose_name_});
+  pose_broadcaster_->get_node()->set_parameter({"frame_id", frame_id_});
+  // default qos_profile is "reliable"
+
+  // Configure controller
+  ASSERT_EQ(
+    pose_broadcaster_->on_configure(rclcpp_lifecycle::State{}),
+    controller_interface::CallbackReturn::SUCCESS);
+
+  // Verify that configuration succeeded with default QoS
+  ASSERT_EQ(
+    pose_broadcaster_->on_activate(rclcpp_lifecycle::State{}),
+    controller_interface::CallbackReturn::SUCCESS);
+
+  // Update and verify publishing works
+  ASSERT_EQ(
+    pose_broadcaster_->update(rclcpp::Time{0}, rclcpp::Duration::from_seconds(0.01)),
+    controller_interface::return_type::OK);
+}
+
+TEST_F(PoseBroadcasterTest, Configure_WithBestEffortQoS)
+{
+  SetUpPoseBroadcaster();
+
+  // Set parameters with best_effort QoS
+  pose_broadcaster_->get_node()->set_parameter({"pose_name", pose_name_});
+  pose_broadcaster_->get_node()->set_parameter({"frame_id", frame_id_});
+  pose_broadcaster_->get_node()->set_parameter({"qos_profile", "best_effort"});
+
+  // Configure controller
+  ASSERT_EQ(
+    pose_broadcaster_->on_configure(rclcpp_lifecycle::State{}),
+    controller_interface::CallbackReturn::SUCCESS);
+
+  // Verify that configuration succeeded with best_effort QoS
+  ASSERT_EQ(
+    pose_broadcaster_->on_activate(rclcpp_lifecycle::State{}),
+    controller_interface::CallbackReturn::SUCCESS);
+
+  // Update and verify publishing works
+  ASSERT_EQ(
+    pose_broadcaster_->update(rclcpp::Time{0}, rclcpp::Duration::from_seconds(0.01)),
+    controller_interface::return_type::OK);
+}
+
+TEST_F(PoseBroadcasterTest, PublishWithBestEffortQoS)
+{
+  SetUpPoseBroadcaster();
+
+  // Set parameters with best_effort QoS
+  pose_broadcaster_->get_node()->set_parameter({"pose_name", pose_name_});
+  pose_broadcaster_->get_node()->set_parameter({"frame_id", frame_id_});
+  pose_broadcaster_->get_node()->set_parameter({"qos_profile", "best_effort"});
+  pose_broadcaster_->get_node()->set_parameter({"tf.enable", false});  // Disable TF for this test
+
+  // Configure and activate controller
+  ASSERT_EQ(
+    pose_broadcaster_->on_configure(rclcpp_lifecycle::State{}),
+    controller_interface::CallbackReturn::SUCCESS);
+  ASSERT_EQ(
+    pose_broadcaster_->on_activate(rclcpp_lifecycle::State{}),
+    controller_interface::CallbackReturn::SUCCESS);
+
+  // Subscribe to pose topic with matching best_effort QoS and verify message can be received
+  geometry_msgs::msg::PoseStamped pose_msg;
+  subscribe_and_get_message("/test_pose_broadcaster/pose", pose_msg, rclcpp::SensorDataQoS());
+
+  // Verify content of pose message
+  EXPECT_EQ(pose_msg.header.frame_id, frame_id_);
+  EXPECT_EQ(pose_msg.pose.position.x, pose_values_[0]);
+  EXPECT_EQ(pose_msg.pose.position.y, pose_values_[1]);
+  EXPECT_EQ(pose_msg.pose.position.z, pose_values_[2]);
+  EXPECT_EQ(pose_msg.pose.orientation.x, pose_values_[3]);
+  EXPECT_EQ(pose_msg.pose.orientation.y, pose_values_[4]);
+  EXPECT_EQ(pose_msg.pose.orientation.z, pose_values_[5]);
+  EXPECT_EQ(pose_msg.pose.orientation.w, pose_values_[6]);
+}
+
 int main(int argc, char * argv[])
 {
   ::testing::InitGoogleMock(&argc, argv);
